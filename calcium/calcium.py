@@ -6,6 +6,7 @@ from bs4 import BeautifulSoup
 
 class Calcium:
     def __init__(self, name, search_at=None):
+        self.cache = {}
         if not search_at:
             if not re.compile(r'^[B-KMNP-T][0-9]{9}$').match(name):
                 raise ValueError, 'Invalid school code:', name
@@ -33,7 +34,7 @@ class Calcium:
             }, l)
 
         if len(self.findResult) == 1:
-            self.code = self.findResult[0].code
+            self.code = self.findResult[0]['code']
         else:
             return self.findResult
 
@@ -42,16 +43,58 @@ class Calcium:
 
     def get(self, year=None, month=None):
         date = datetime.date.today()
-        if type(year) !== 'int' or type(month) !== 'int':
-            raise ValueError, 'Invalid arguments (int excepted)'
         if not year:
             year = date.year
         if not month:
             month = date.month
+        if type(year) != type(0) or type(month) != type(0):
+            raise ValueError, 'Invalid arguments (int excepted)'
+
+        r = self._get_cache(year, month)
+        if not r:
+            r = []
+        else:
+            return r
         
-        req = urllib2.Request('http://%s/sts_sci_md00_001.do?schulCode=%ㄴ&schulCrseScCode=4&schYm=%04d.%02d' \
+        req = urllib2.Request('http://%s/sts_sci_md00_001.do?schulCode=%s&schulCrseScCode=4&schYm=%04d.%02d' \
             % (self.domain, self.code, year, month)
             )
+        res = urllib2.urlopen(req).read()
+        soup = BeautifulSoup(res)
+
+        for day in soup.select('.tbl_type3 td div'):
+            print day
+            if not day or not day.find('<br>'):
+                continue
+
+            day = re.sub(r'[①-⑬]+', '', day)
+            date = day.split('<br>')[0]
+            item = day.split('<br>')[1:]
+            r[date] = {}
+
+            for i in range(1, item.length, 2):
+
+                name = re.sub(r'(\[|\])', '', item[i])
+                value = [ j for j in item[i+1].split('<br>') if j ]
+
+                if name == '조식':
+                    r[date].breakfast = value
+                if name == '중식':
+                    r[date].lunch = value
+                if name == '석식':
+                    r[date].dinner = value
+  
+        self._set_cache(year, month, r)
+        return r
+        
+    def _set_cache(self, year, month, value):
+        if not self.cache.get('year'):
+            self.cache[year] = {}
+
+        self.cache[year][month] = value
+
+    def _get_cache(self, year, month):
+        return self.cache.get('year') and self.cache[year].get('month')
 
     def _set_neis_domain(self, q):
         #     A : ??
