@@ -1,8 +1,9 @@
 #!/usr/bin/env python2
 # coding: utf-8
 
-import re, urllib2, json, datetime
+import re, urllib, urllib2, json, datetime
 from bs4 import BeautifulSoup
+from collections import defaultdict
 
 class Calcium:
     def __init__(self, name, search_at=None):
@@ -34,9 +35,12 @@ class Calcium:
             }, l)
 
         if len(self.findResult) == 1:
-            self.code = self.findResult[0]['code']
+            return self.findResult[0]['code']
         else:
-            return self.findResult
+            return None
+  	
+    def results(self):
+        return self.findResult
 
     def select(self, code):
         self.code = code
@@ -47,43 +51,47 @@ class Calcium:
             year = date.year
         if not month:
             month = date.month
-        if type(year) != type(0) or type(month) != type(0):
+        if type(year) != int or type(month) != int:
             raise ValueError, 'Invalid arguments (int excepted)'
+        if self.code == None:
+            raise ValueError, 'School not selected (use results() and select())'
 
         r = self._get_cache(year, month)
         if not r:
-            r = []
+            r = {}
         else:
             return r
-        
-        req = urllib2.Request('http://%s/sts_sci_md00_001.do?schulCode=%s&schulCrseScCode=4&schYm=%04d.%02d' \
-            % (self.domain, self.code, year, month)
-            )
-        res = urllib2.urlopen(req).read()
+
+        req = urllib2.Request('http://%s/sts_sci_md00_001.do' % self.domain)
+
+        res = urllib2.urlopen(req, urllib.urlencode({
+          'schulCode': self.code,
+          'schulCrseScCode': 4,
+          'ay': year,
+          'mm': str(month).zfill(2)
+        }))
+        res = res.read()
         soup = BeautifulSoup(res)
-
+        
         for day in soup.select('.tbl_type3 td div'):
-            print day
-            if not day or not day.find('<br>'):
+
+            contents = day.contents
+
+            if not day or len(day) <= 1:
                 continue
-
-            day = re.sub(r'[①-⑬]+', '', day)
-            date = day.split('<br>')[0]
-            item = day.split('<br>')[1:]
-            r[date] = {}
-
-            for i in range(1, item.length, 2):
-
-                name = re.sub(r'(\[|\])', '', item[i])
-                value = [ j for j in item[i+1].split('<br>') if j ]
-
-                if name == '조식':
-                    r[date].breakfast = value
-                if name == '중식':
-                    r[date].lunch = value
-                if name == '석식':
-                    r[date].dinner = value
+  	        
+            date = int(contents[0])
+            item = contents[2::2]
   
+            r[date] = defaultdict(list)
+            name = ''
+
+            for i in item:
+                if i.strip('[]') != i:
+                    name = i.strip('[]')
+                else:
+                    r[date][name].append(i)
+
         self._set_cache(year, month, r)
         return r
         
@@ -95,6 +103,9 @@ class Calcium:
 
     def _get_cache(self, year, month):
         return self.cache.get('year') and self.cache[year].get('month')
+
+    def _strip_circles(self, string):
+        return re.sub(r'[①-⑬]+', '', string)
 
     def _set_neis_domain(self, q):
         #     A : ??
