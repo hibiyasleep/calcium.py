@@ -38,7 +38,7 @@ class Calcium:
             return self.findResult[0]['code']
         else:
             return None
-  	
+
     def results(self):
         return self.findResult
 
@@ -72,17 +72,17 @@ class Calcium:
         }))
         res = res.read()
         soup = BeautifulSoup(res)
-        
+
         for day in soup.select('.tbl_type3 td div'):
 
             contents = day.contents
 
             if not day or len(day) <= 1:
                 continue
-  	        
+
             date = int(contents[0])
             item = contents[2::2]
-  
+
             r[date] = defaultdict(list)
             name = ''
 
@@ -94,7 +94,7 @@ class Calcium:
 
         self._set_cache(year, month, r)
         return r
-        
+
     def _set_cache(self, year, month, value):
         if not self.cache.get('year'):
             self.cache[year] = {}
@@ -110,40 +110,40 @@ class Calcium:
     def _set_neis_domain(self, q):
         #     A : ??
         if q in ['B', 'sen', 'seoul', '서울', '서울특별시']:
-            self.domain = 'hes.sen.go.kr'
+            self.domain = 'stu.sen.go.kr'
         elif q in ['C', 'pen', 'busan', '부산', '부산광역시']:
-            self.domain = 'hes.pen.go.kr'
+            self.domain = 'stu.pen.go.kr'
         elif q in ['D', 'dge', 'daegu', '대구', '대구광역시', '머구', '대집트']:
-            self.domain = 'hes.dge.go.kr'
+            self.domain = 'stu.dge.go.kr'
         elif q in ['E', 'ice', 'incheon', '인천', '인천광역시', '마계']:
-            self.domain = 'hes.ice.go.kr'
+            self.domain = 'stu.ice.go.kr'
         elif q in ['F', 'gen', 'gwangju', '광주', '광주광역시', '팡주']:
-            self.domain = 'hes.gen.go.kr'
+            self.domain = 'stu.gen.go.kr'
         elif q in ['G', 'dje', 'daejeon', '대전', '대전광역시', '머전']:
-            self.domain = 'hes.dje.go.kr'
+            self.domain = 'stu.dje.go.kr'
         elif q in ['H', 'use', 'ulsan', '울산', '울산광역시']:
-            self.domain = 'hes.use.go.kr'
+            self.domain = 'stu.use.go.kr'
         elif q in ['I', 'sje', 'sejong', '세종', '세종시', '세종특별자치시']:
-            self.domain = 'hes.sje.go.kr'
+            self.domain = 'stu.sje.go.kr'
         elif q in ['J', 'goe', 'gyeonggi', '경기', '경기도']:
-            self.domain = 'hes.goe.go.kr'
+            self.domain = 'stu.goe.go.kr'
         elif q in ['K', 'gwe', 'gangwon', '강원', '강원도']:
-            self.domain = 'hes.gwe.go.kr'
+            self.domain = 'stu.gwe.go.kr'
         #     L : ??
         elif q in ['M', 'cbe', 'chungbuk', '충북', '충청북도']:
-            self.domain = 'hes.cbe.go.kr'
+            self.domain = 'stu.cbe.go.kr'
         elif q in ['N', 'cne', 'chungnam', '충남', '충청남도']:
-            self.domain = 'hes.cne.go.kr'
+            self.domain = 'stu.cne.go.kr'
         #     O : ??
         elif q in ['P', 'jbe', 'jeonbuk', '전북', '전라북도']:
-            self.domain = 'hes.jbe.go.kr'
+            self.domain = 'stu.jbe.go.kr'
         elif q in ['Q', 'jne', 'jeonnam', '전남', '전라남도']:
-            self.domain = 'hes.jne.go.kr'
+            self.domain = 'stu.jne.go.kr'
         elif q in ['R', 'gbe', 'gyeongbuk', '경북', '경상북도']:
-            self.domain = 'hes.gbe.kr'
+            self.domain = 'stu.gbe.kr'
         elif q in ['S', 'gne', 'gyeongnam', '경남', '경상남도']:
-            self.domain = 'hes.gne.go.kr'
+            self.domain = 'stu.gne.go.kr'
         elif q in ['T', 'jje', 'jeju', '제주', '제주도', '탐라', '탐라국']:
-            self.domain = 'hes.jje.go.kr'
+            self.domain = 'stu.jje.go.kr'
         else:
             raise NameError, "No NEIS domain for prefix or query '%s' found" % query[0]
