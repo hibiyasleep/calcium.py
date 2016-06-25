@@ -1,29 +1,38 @@
 #!/usr/bin/env python2
 # coding: utf-8
 
-import re, urllib, urllib2, json, datetime
+import re, json, datetime
 from bs4 import BeautifulSoup
 from collections import defaultdict
+
+try: # py2
+    from urllib import urlencode
+    from urllib2 import Request, urlopen
+except ImportError: # py3
+    from urllib.parse import urlencode
+    from urllib.request import Request, urlopen
 
 class Calcium:
     def __init__(self, name, search_at=None):
         self.cache = {}
         if not search_at:
             if not re.compile(r'^[B-KMNP-T][0-9]{9}$').match(name):
-                raise ValueError, 'Invalid school code:', name
+                raise ValueError('Invalid school code: %s' % name)
             self._set_neis_domain(name[0])
             self.code = name
         elif type(search_at) is str:
             self.code = self.find(name, search_at)
         else:
-            raise ValueError, 'No (or invalid) arguments specified'
+            raise ValueError('No (or invalid) arguments specified')
 
     def find(self, query, dep):
         self._set_neis_domain(dep)
-        req = urllib2.Request('http://%s/spr_ccm_cm01_100.do?kraOrgNm=%s' \
-                % (self.domain, query)
+        req = Request('http://%s/spr_ccm_cm01_100.do?%s' \
+                % (self.domain, urlencode({
+                    'kraOrgNm': query
+                }))
             )
-        res = urllib2.urlopen(req).read()
+        res = urlopen(req).read()
         j = json.loads(res)
         l = j['resultSVO']['orgDVOList']
 
@@ -52,9 +61,9 @@ class Calcium:
         if not month:
             month = date.month
         if type(year) != int or type(month) != int:
-            raise ValueError, 'Invalid arguments (int excepted)'
+            raise ValueError('Invalid arguments (int excepted)')
         if self.code == None:
-            raise ValueError, 'School not selected (use results() and select())'
+            raise ValueError('School not selected (use results() and select())')
 
         r = self._get_cache(year, month)
         if not r:
@@ -62,9 +71,9 @@ class Calcium:
         else:
             return r
 
-        req = urllib2.Request('http://%s/sts_sci_md00_001.do' % self.domain)
+        req = Request('http://%s/sts_sci_md00_001.do' % self.domain)
 
-        res = urllib2.urlopen(req, urllib.urlencode({
+        res = urlopen(req, urlencode({
           'schulCode': self.code,
           'schulCrseScCode': 4,
           'ay': year,
@@ -109,7 +118,7 @@ class Calcium:
 
     def _set_neis_domain(self, q):
         #     A : ??
-        if q in ['B', 'sen', 'seoul', '서울', '서울특별시']:
+        if   q in ['B', 'sen', 'seoul', '서울', '서울특별시']:
             self.domain = 'stu.sen.go.kr'
         elif q in ['C', 'pen', 'busan', '부산', '부산광역시']:
             self.domain = 'stu.pen.go.kr'
@@ -146,4 +155,4 @@ class Calcium:
         elif q in ['T', 'jje', 'jeju', '제주', '제주도', '탐라', '탐라국']:
             self.domain = 'stu.jje.go.kr'
         else:
-            raise NameError, "No NEIS domain for prefix or query '%s' found" % query[0]
+            raise NameError("No NEIS domain for prefix or query '%s' found" % query[0])
