@@ -118,19 +118,19 @@ class Calcium:
 
     def _set_neis_domain(self, q):
         #     A : ??
-        if   q in ['B', 'sen', 'seoul', '서울', '서울특별시']:
+        if   q in ['B', 'sen', 'seoul', '서울', '서울시', '서울특별시']:
             self.domain = 'stu.sen.go.kr'
-        elif q in ['C', 'pen', 'busan', '부산', '부산광역시']:
+        elif q in ['C', 'pen', 'busan', '부산', '부산시', '부산광역시']:
             self.domain = 'stu.pen.go.kr'
-        elif q in ['D', 'dge', 'daegu', '대구', '대구광역시', '머구', '대집트']:
+        elif q in ['D', 'dge', 'daegu', '대구', '대구시', '대구광역시']:
             self.domain = 'stu.dge.go.kr'
-        elif q in ['E', 'ice', 'incheon', '인천', '인천광역시', '마계']:
+        elif q in ['E', 'ice', 'incheon', '인천', '인천시', '인천광역시']:
             self.domain = 'stu.ice.go.kr'
-        elif q in ['F', 'gen', 'gwangju', '광주', '광주광역시', '팡주']:
+        elif q in ['F', 'gen', 'gwangju', '광주', '광주시', '광주광역시']:
             self.domain = 'stu.gen.go.kr'
-        elif q in ['G', 'dje', 'daejeon', '대전', '대전광역시', '머전']:
+        elif q in ['G', 'dje', 'daejeon', '대전', '대전시', '대전광역시']:
             self.domain = 'stu.dje.go.kr'
-        elif q in ['H', 'use', 'ulsan', '울산', '울산광역시']:
+        elif q in ['H', 'use', 'ulsan', '울산', '울산시', '울산광역시']:
             self.domain = 'stu.use.go.kr'
         elif q in ['I', 'sje', 'sejong', '세종', '세종시', '세종특별자치시']:
             self.domain = 'stu.sje.go.kr'
@@ -152,7 +152,7 @@ class Calcium:
             self.domain = 'stu.gbe.kr'
         elif q in ['S', 'gne', 'gyeongnam', '경남', '경상남도']:
             self.domain = 'stu.gne.go.kr'
-        elif q in ['T', 'jje', 'jeju', '제주', '제주도', '탐라', '탐라국']:
+        elif q in ['T', 'jje', 'jeju', '제주', '제주도']:
             self.domain = 'stu.jje.go.kr'
         else:
             raise NameError("No NEIS domain for prefix or query '%s' found" % query[0])
